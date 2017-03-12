@@ -12,17 +12,17 @@ type CharRange struct {
 	min, max int
 }
 
-
-
-var uppers = CharRange{65,90}
-var lowers = CharRange{97,122}
-var digits = CharRange{49,56}
-var special = []CharRange{
-	CharRange{32,47},
-	CharRange{58,64},
-	CharRange{91,96},
-	CharRange{123,126},
-}
+var (
+	uppers = CharRange{65,90}
+	lowers = CharRange{97,122}
+	digits = CharRange{49,56}
+	special = []CharRange{
+			CharRange{32,47},
+			CharRange{58,64},
+			CharRange{91,96},
+			CharRange{123,126},
+		}
+	)
 
 func makeRange(cr CharRange) []int {
 	a := make([]int, cr.max-cr.min+1)
@@ -42,6 +42,10 @@ func makeSequence(cra []CharRange) []int {
 	return res
 }
 
+func ri(l int) int {
+	return rand.Intn(l)
+}
+
 func rs(chars []int, l int, f bool) string {
 	if !f {
 		rand.Seed(time.Now().UTC().UnixNano())
@@ -51,12 +55,10 @@ func rs(chars []int, l int, f bool) string {
 		if f {
 			rand.Seed(time.Now().UTC().UnixNano())
 		}
-		index := rand.Intn(len(chars))
-		result += string(chars[index])
+		result += string(chars[ri(len(chars))])
 	}
 	return result
 }
-
 
 type argT struct {
     cli.Helper
