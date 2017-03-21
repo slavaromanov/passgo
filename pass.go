@@ -1,93 +1,56 @@
 package main
 
 import (
-	"math/rand"
-	"time"
-
-	"github.com/mkideal/cli"
-	"github.com/atotto/clipboard"
+  "os"
+  "time"
+  "regexp"
+  "strconv"
+  "math/rand"
 )
 
-type CharRange struct {
-	min, max int
-}
-
 var (
-	uppers = CharRange{65,90}
-	lowers = CharRange{97,122}
-	digits = CharRange{49,56}
-	special = []CharRange{
-			CharRange{32,47},
-			CharRange{58,64},
-			CharRange{91,96},
-			CharRange{123,126},
-		}
-	)
-
-func makeRange(cr CharRange) []int {
-	a := make([]int, cr.max-cr.min+1)
-	for i := range a {
-		a[i] = cr.min + i
-	}
-	return a
-}
-
-
-func makeSequence(cra []CharRange) []int {
-	var res []int
-	for _, cr := range cra {
-		a := makeRange(cr)
-		res = append(res, a[:]...)
-	}
-	return res
-}
-
-func ri(l int) int {
-	return rand.Intn(l)
-}
-
-func rs(chars []int, l int, f bool) string {
-	if !f {
-		rand.Seed(time.Now().UTC().UnixNano())
-	}
-	result := ""
-	for i := 0; i < l; i++ {
-		if f {
-			rand.Seed(time.Now().UTC().UnixNano())
-		}
-		result += string(chars[ri(len(chars))])
-	}
-	return result
-}
-
-type argT struct {
-    cli.Helper
-    L	 int  `cli:"*l,length" usage:"define string length"`
-    I    bool `cli:"i,ignore-case" usage:"boolean type ignore case register (lower only)"`
-    S    bool `cli:"s,specials" usage:"boolean type include special characters"`
-    C	 bool `cli:"c,clip" usage:"copy output to clipboards"`
-    F    bool `cli:"!f,force" usage:"add more colision to GPRD"`
-    Q	 bool `cli:"q,quiet" usage:"not output volume to stdout"`
-}
-
+  err error
+  length int
+  alpha []byte
+  filter = make([]bool, 4)
+  m = map[byte]int{'u': 0, 'l': 1, 'd': 2, 's': 3}
+  dre = regexp.MustCompile("^[0-9]*$")
+  sre = regexp.MustCompile("^-([ulds]{1,4})$")
+  lre = regexp.MustCompile("^--(upper|lower|spec|digits)$")
+  help = "\n\nOptions:\n\t-d, --digits\tinclude digits\n\t-u, --upper \tinclude uppercase\n\t-l, --lower\tinclude lowercase\n\t-s, --spec\tinclude punctuation"
+  getter = map[int][]byte{
+    0: []byte{65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85,86, 87, 88, 89, 90},
+    1: []byte{97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122},
+    2: []byte{48, 49, 50, 51, 52, 53, 54, 55, 56, 57},
+    3: []byte{33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 60, 61, 62, 63, 64, 91, 92,93, 94, 95, 96, 123, 124, 125, 126},
+  }
+)
 
 func main() {
-	cli.Run(new(argT), func(ctx *cli.Context) error {
-		argv := ctx.Argv().(*argT)
-		chars := []CharRange{lowers, digits}
-		if !argv.I {
-			chars = append(chars, uppers)
-		}
-		if argv.S == true {
-			for _, x := range special {
-				chars = append(chars, x)
-			}
-		}
-		res := rs(makeSequence(chars), argv.L, argv.F)
-		if argv.C == true {
-			clipboard.WriteAll(res)
-		}
-		print(res, "\n")
-		return nil
-	})
+  out := "Usage: \n\t" + os.Args[0] + " -dlus 32\n\ts:bXxv`kOZesS)Ll" + help
+  if len(os.Args) > 1 {
+    rand.Seed(time.Now().UTC().UnixNano())
+    for _, a := range os.Args[1:] {
+      if sre.MatchString(a) {
+        for _, c := range []byte(sre.FindStringSubmatch(a)[1]) {
+          filter[m[c]] = true
+        }
+        } else if dre.MatchString(a) {
+          length, err = strconv.Atoi(a)
+          if err != nil {panic(err)}
+        } else if lre.MatchString(a) {
+            filter[m[[]byte(lre.FindStringSubmatch(a)[1])[0]]] = true
+        } else {
+          length, out = 0, ("Unknown argument " + a + help)
+          break
+        }
+    }
+    if length > 0 {
+      out = ""
+      for i, b := range filter {if b {alpha = append(alpha, getter[i]...)}}
+      if len(alpha) == 0 {alpha = append(alpha, append(getter[0], append(getter[1], getter[2]...)...)...)}
+      for i:=0; i<length; i++ {out += string(alpha[rand.Intn(len(alpha))])}
+    }
+  }
+  println(out)
 }
