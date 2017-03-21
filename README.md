@@ -1,3 +1,3 @@
 # passgo
 
-Simple password generator with cli interface.
+Password generator with cli interface.
