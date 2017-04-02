@@ -4,8 +4,7 @@ var (
 	err    error
 	l      int
 	alpha  []byte
-	status = 0
-	e      = false
+	clean  = true
 	pass   = ""
 	filter = make([]bool, 4)
 	m      = map[byte]int{'u': 0, 'l': 1, 'd': 2, 's': 3}

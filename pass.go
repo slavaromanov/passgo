@@ -28,16 +28,16 @@ func lcg(a, c, m, seed uint32) func() uint32 {
 	}
 }
 
-func pow10(b int) int {
-	p, a := 1, 10
-	for b > 0 {
-		if b&1 != 0 {
-			p *= a
+func pow10(pow int) int {
+	res, val := 1, 10
+	for pow > 0 {
+		if pow&1 != 0 {
+			res *= val
 		}
-		b >>= 1
-		a *= a
+		val *= val
+		pow >>= 1 // equal `pow /= 2`
 	}
-	return p
+	return res
 }
 
 func atoi(digit string) (r int) {
@@ -55,51 +55,34 @@ func randint(foo func() uint32, max int) func() int {
 	}
 }
 
-func defaultAlpha() []byte {
-	return append(getter[0], append(getter[1], getter[2]...)...)
-}
-
-func compare(x ...string) (one string) {
-	for _, s := range x {
-		one += s
-	}
-	return
-}
-
-func switchFilter(c byte) string {
+func switchFilter(c byte) bool {
 	b, ok := m[c]
-	if ok {
-		filter[b] = true
-		return ""
-	}
-	return "Invalid option\n"
+	filter[b] = true
+	return ok
 }
 
-func flagParse(flags []string) (res string) {
+func flagParse(flags []string) error {
 	for _, a := range flags {
 		charr := []byte(a)
 		if charr[0] == '-' {
 			if all(string(charr[0:2]), []byte("-")) {
-				res += switchFilter(charr[2])
+				clean = clean && switchFilter(charr[2])
 			} else {
 				for _, c := range charr[1:] {
-					res += switchFilter(c)
+					clean = clean && switchFilter(c)
 				}
 			}
 		} else if all(a, getter[2]) {
 			l = atoi(a)
 		}
 	}
-	return
+	return nil
 }
 
 // PassGen ... READ FLAGS AND GENERATING PASS
 func PassGen(flags []string) string {
 	alp := &alpha
-	fr := flagParse(flags)
-	if fr != "" {
-		return fr
-	}
+	flagParse(flags)
 	for i, b := range filter {
 		if b {
 			*alp = append(alpha, getter[i]...)

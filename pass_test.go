@@ -6,18 +6,16 @@ func TestAny(t *testing.T) {
 	if any('c', []byte("klasjlkcaw")) == false {
 		t.Fatal("TestAny failed")
 	}
-	t.Log("TestAny pass")
 }
 
 func TestAll(t *testing.T) {
 	if all("hello", []byte("abcdefghijklmnop")) == false {
 		t.Fatal("TestAll failed")
 	}
-	t.Log("TestAny pass")
 }
 
 func TestPow10(t *testing.T) {
-	if pow10(5) != 100000 {
+	if pow10(5) != 10*10*10*10*10 {
 		t.Fail()
 	}
 }
@@ -43,29 +41,14 @@ func TestPassGen(t *testing.T) {
 	}
 }
 
-func TestDefaultAlpha(t *testing.T) {
-	if !all(string(defaultAlpha()), alphabeth) {
-		t.Fail()
-	}
-}
-
 func TestFlagParse(t *testing.T) {
-	fp := flagParse([]string{"10", "--dige", "--spec", "-lu"})
-	t.Log(fp)
-	if fp != "" {
-		t.Fail()
-	}
-}
-
-func TestCompare(t *testing.T) {
-	if compare("test ", "pass!") != "test pass!" {
+	if flagParse([]string{"10", "--dige", "--spec", "-lu"}) != nil && clean {
 		t.Fail()
 	}
 }
 
 func TestSwitchFilter(t *testing.T) {
-	lg := switchFilter('d')
-	if lg != "" || filter[m['d']] != true {
+	if !switchFilter('d') || filter[m['d']] != true {
 		t.Fail()
 	}
 }
