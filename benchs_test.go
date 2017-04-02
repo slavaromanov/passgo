@@ -54,3 +54,5 @@ func BenchmarkNewPassSLU10000(b *testing.B)  { benchmarkNewPass([]string{"10000"
 func BenchmarkNewPassL10000(b *testing.B)    { benchmarkNewPass([]string{"10000", "-l"}, b) }
 func BenchmarkNewPassLU10000(b *testing.B)   { benchmarkNewPass([]string{"10000", "-lu"}, b) }
 func BenchmarkNewPassU10000(b *testing.B)    { benchmarkNewPass([]string{"10000", "-u"}, b) }
+
+func BenchmarkNewPassDLSU100000000(b *testing.B) { benchmarkNewPass([]string{"100000000", "-dlsu"}, b) }

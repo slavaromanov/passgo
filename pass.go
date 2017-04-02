@@ -97,8 +97,7 @@ func GetAlphabet(flags []string) []byte {
 		}
 	}
 	m := serializeMap()
-	res := m[len(alpha) != 0]
-	return res
+	return m[len(alpha) != 0]
 }
 
 // PassGen ... READ FLAGS AND GENERATING PASS
@@ -114,3 +113,4 @@ func PassGen(abc []byte) (pass []byte) {
 func NewPass(fl []string) string {
 	return string(PassGen(GetAlphabet(fl)))
 }
+
