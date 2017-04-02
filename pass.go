@@ -20,10 +20,10 @@ func all(word string, set []byte) bool {
 	return true
 }
 
-func lcg(a, c, m, seed uint32) func() uint32 {
-	r := seed
+func lcg() func() uint32 {
+	r := uint32(os.Getppid() + os.Getpid())
 	return func() uint32 {
-		r = (a*r + c) % m
+		r = (1103515245*r + 12345) % uint32((1<<31)-1)
 		return r
 	}
 }
@@ -56,41 +56,61 @@ func randint(foo func() uint32, max int) func() int {
 }
 
 func switchFilter(c byte) bool {
-	b, ok := m[c]
-	filter[b] = true
+	b, ok := getter[c]
+	if ok {
+		for _, q := range b {
+			alpha[q] = true
+		}
+	}
 	return ok
 }
 
-func flagParse(flags []string) error {
+func serializer(obj map[byte]bool) []byte {
+	var b []byte
+	for c := range obj {
+		b = append(b, c)
+	}
+	return b
+}
+
+func serializeMap() map[bool][]byte {
+	return map[bool][]byte{
+		false: append(getter['l'], append(getter['u'], getter['d']...)...),
+		true:  serializer(alpha),
+	}
+}
+
+// GetAlphabet generate alphabeth by flags
+func GetAlphabet(flags []string) []byte {
 	for _, a := range flags {
 		charr := []byte(a)
 		if charr[0] == '-' {
 			if all(string(charr[0:2]), []byte("-")) {
-				clean = clean && switchFilter(charr[2])
+				switchFilter(charr[2])
 			} else {
 				for _, c := range charr[1:] {
-					clean = clean && switchFilter(c)
+					switchFilter(c)
 				}
 			}
-		} else if all(a, getter[2]) {
+		} else if all(a, getter['d']) {
 			l = atoi(a)
 		}
 	}
-	return nil
+	m := serializeMap()
+	res := m[len(alpha) != 0]
+	return res
 }
 
 // PassGen ... READ FLAGS AND GENERATING PASS
-func PassGen(flags []string) string {
-	alp := &alpha
-	flagParse(flags)
-	for i, b := range filter {
-		if b {
-			*alp = append(alpha, getter[i]...)
-		}
-	}
-	rnd := randint(lcg(1103515245, 12345, uint32((1<<31)-1), uint32(os.Getppid()+os.Getpid())), len(alpha))
+func PassGen(abc []byte) (pass []byte) {
+	rnd := randint(lcg(), len(abc))
 	for ; l > 0; l-- {
-		pass += string(alpha[rnd()])
+		pass = append(pass, abc[rnd()])
 	}
 	return pass
+}
+
+// NewPass generate password
+func NewPass(fl []string) string {
+	return string(PassGen(GetAlphabet(fl)))
 }

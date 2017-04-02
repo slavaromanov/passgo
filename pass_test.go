@@ -27,36 +27,41 @@ func TestAtoi(t *testing.T) {
 }
 
 func TestRandint(t *testing.T) {
-	r := randint(lcg(1103515245, 12345, uint32((1<<31)-1), uint32(0)), 16)
+	r := randint(lcg(), 16)
 	rr := r()
 	if rr > 15 || rr < 0 {
 		t.Fail()
 	}
 }
 
-func TestPassGen(t *testing.T) {
-	PassGen([]string{"10", "-d"})
-	if pass == "" {
-		t.Fail()
-	}
-}
-
-func TestFlagParse(t *testing.T) {
-	if flagParse([]string{"10", "--dige", "--spec", "-lu"}) != nil && clean {
+func TestGenAlpha(t *testing.T) {
+	if len(GetAlphabet([]string{"10", "--dige", "--spec", "-lu"})) <= 0 {
 		t.Fail()
 	}
 }
 
 func TestSwitchFilter(t *testing.T) {
-	if !switchFilter('d') || filter[m['d']] != true {
+	if !switchFilter('l') {
 		t.Fail()
 	}
 }
 
-func TestM(t *testing.T) {
-	if !t.Run("string", func(t *testing.T) {
-		main()
-	}) {
+func TestSerializeMap(t *testing.T) {
+	if len(serializeMap()[false]) != 62 {
+		t.Fail()
+	}
+}
+
+func TestSerializer(t *testing.T) {
+	if string(serializer(map[byte]bool{
+		'f': false,
+	})) != "f" {
+		t.Fail()
+	}
+}
+
+func TestNewPass(t *testing.T) {
+	if len(NewPass([]string{"16"})) != 16 {
 		t.Fail()
 	}
 }
